@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+	<meta charset="utf-8" />
+	<title>sals' wasm-go-httpclient</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<link rel="stylesheet" href="stylesheets/main.css">
+	<script src="js/wasm_exec.js" defer></script>
+	<script src="js/wasm.js" defer></script>
+</head>
+
+<body>
+	Bucket: <input class="mdl-textfield" type="text" id="b" name="b" value="PROJECT_ID-bucket">
+	<br/>
+	File: <input class="mdl-textfield" type="text" id="f" name="f" value="foo.json">
+	<br/>
+	access_token: <input class="mdl-textfield" type="text" id="t" name="t" value="">	
+	<br />
+	<button id="submit" name="submit" onclick="GetFile(b.value,f.value,t.value)">GetFile</button>
+	<br />
+	<button id="submit" name="submit" onclick="GetFileStream(b.value,f.value,t.value)">GetFileStream</button>
+	<br />
+	<br />
+
+	<pre id="json"></pre>
+
+</body>
+<script>
+
+	async function GetFile(bucket, file, token) {
+		try {
+			console.time();
+			const response = await GetGCSFile(bucket, file, token)
+			const message = await response.json()
+			console.timeEnd();
+			document.getElementById('json').textContent = JSON.stringify(message, undefined, 2);
+		} catch (err) {
+			console.error('Caught exception', err)
+		}
+	}
+
+	async function GetFileStream(bucket, file, token) {
+		try {
+			console.time();
+			const response = await GetGCSFileStream(bucket, file, token)
+			const reader = response.body.getReader()
+			let done = false
+			let totalBytes = 0;
+			let strResponse = '';
+			while (!done) {
+				const read = await reader.read()
+				done = read && read.done
+				if (read.value) {
+					const bytesString = String.fromCharCode(...read.value)
+					strResponse = strResponse + bytesString;
+					totalBytes = totalBytes + read.value.length;
+					console.log('Read', totalBytes, 'bytes')
+				}
+			}
+			console.timeEnd();
+
+			document.getElementById('json').textContent = strResponse;
+		} catch (err) {
+			console.error('Caught exception', err)
+		}
+	}
+
+
+</script>
+
+</html>
