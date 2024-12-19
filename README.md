@@ -41,6 +41,8 @@ cd wasm_http_gcs_go
 GOOS=js GOARCH=wasm go build -o  server/static/wasm/main.wasm  main.go
 ```
 
+Note, where we got `wasm_exec.js` from [here](https://raw.githubusercontent.com/golang/go/refs/tags/go1.21.0/misc/wasm/wasm_exec.js)
+
 The webserver i use here to host the 'site' uses the certificate SNI name of `gcs.somedomain.com`.
 
 So lets setup a local redirect for that in `/etc/hosts`
